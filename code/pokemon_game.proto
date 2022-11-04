@@ -8,6 +8,7 @@ service PokemonGame{
 	rpc Move (movepos) returns (movecomplete) {}
 	rpc pokemon_list (name) returns (pokemon_captured) {}
 	rpc client_path (name) returns (path) {}
+	rpc trainer_list (name) returns (pokemon_captured) {}
 
 }
 // (row, column) position to move to and the hostname to log the movement detail
@@ -32,6 +33,10 @@ message checkpos{
 	repeated int32 checkboard = 1;
 }
 
+// Returns the trained that captured the pokemon.
+message trainer_name{
+	string trainer = 1;
+}
 //Returns list of captured pokemon by the host name so client can update its pokedex
 message pokemon_captured{
 	repeated string pokemon_name = 1;
