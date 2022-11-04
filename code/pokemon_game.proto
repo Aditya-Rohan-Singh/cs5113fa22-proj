@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package pokemon_game;
+
+
+service PokemonGame{
+	rpc checkboard (name) returns (checkpos) {}
+	rpc Move (movepos) returns (movecomplete) {}
+	rpc pokemon_list (name) returns (pokemon_captured) {}
+	rpc client_path (name) returns (path) {}
+
+}
+// (row, column) position to move to and the hostname to log the movement detail
+message movepos{
+	int32 row = 1;
+	int32 column = 2;
+	string hostname = 3;
+}
+// Flag to store if move is complete. Returns 1 if only move is done, returns 2 if pokemon captured on the move as well
+message movecomplete{
+	int32 movecompleted = 1;
+}
+
+// Hostname
+message name{
+	string hostname = 1;
+}
+
+// It returns available movements on the space around it in the form of an array. -1 for no move, 1 for possible move and 2 for pokemon in the space
+// Does not return the whole board just the movement space around it.
+message checkpos{
+	repeated int32 checkboard = 1;
+}
+
+//Returns list of captured pokemon by the host name so client can update its pokedex
+message pokemon_captured{
+	repeated string pokemon_name = 1;
+}
+
+//Returns an array of the path followed by the hostname. The array will be of the from like 12. where 1 is the row number and 2 the column number
+message path{
+	repeated int32 path_followed = 1;
+}
