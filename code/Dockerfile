@@ -32,7 +32,7 @@ COPY . /usr/src/app
 # Create the protobuf files
 # RUN protoc --python_out=. guessing_game.proto
 # Code below works similarly
-RUN python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. guessing_game.proto
+RUN python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. pokemon_game.proto
 
 EXPOSE 22
 EXPOSE 80

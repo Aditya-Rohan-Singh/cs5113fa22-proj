@@ -1,0 +1,10 @@
+Baby: \U0001F376
+Child: \U0001F9D2
+Boy: \U0001F466
+Girl: \U0001F467
+Man Whilte hair: \U0001F9B3 
+Man: \U0001F468
+Woman: \U0001F469
+Person frowning: \U0001F64D 
+Old Woman: \U0001F475
+Older Person: \U0001F9D3
