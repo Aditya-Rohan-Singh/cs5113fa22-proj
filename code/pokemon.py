@@ -14,17 +14,21 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     f = open("docker-compose.yml","w")
+    f1 = open("node-list.txt","w")
     f.write("version: '3.7'\n\n")
     f.write("services:\n  server:\n    build: .\n    hostname: server\n    container_name: Server\n    networks:\n      - default")
     for idx in range(args.T):
-        row = "\n  client"+str(idx+1)+":\n    build: .\n    hostname: " + trainer_list[idx] + "\n    container_name: " + trainer_list[idx] + "\n    networks:\n      - default"
+        row = "\n  client"+str(idx+1)+":\n    build: .\n    hostname: trainer" + str(idx+1) +"\n    container_name: Trainer" + str(idx+1) + "\n    networks:\n      - default"
         f.write(row)
+        f1.write("Trainer" + str(idx+1) + ": " + trainer_list[idx]+ "\n")
 
     for idx1 in range(args.P):
-        row =  "\n  client"+str(args.T+idx1+1)+":\n    build: .\n    hostname: " + pokemon_list[idx1] + "\n    container_name: " + pokemon_list[idx1] + "\n    networks:\n      - default"
+        row =  "\n  client"+str(args.T+idx1+1)+":\n    build: .\n    hostname: pokemon" + str(idx1+1) + "\n    container_name: Pokemon" + str(idx1+1) + "\n    networks:\n      - default"
         f.write(row)
+        f1.write("Pokemon" + str(idx1+1) + ": " + pokemon_list[idx1]+ "\n")
 
     f.close()
+    f1.close()
         
         
 
