@@ -34,10 +34,37 @@ where i is an index tracking the number of P and T.
 
 - The script will utilize a list of pre-saved 25 human emoji and animal emoji to assign hostname to Trainer and POkemon respectively.
 
-- The script will also create a list of Trainers and Pokemon as per the given user input. 
+- The script will also create a list of Trainers and Pokemon as per the given user input 
 
 - Once the docker-compose.yml file is dynamically created, the script will utilize the subprocess package to execute the command "docker-compose up --build: which will create the mentioned containers in the docker-compose.yml file that was dynamically created based on user input.
 
 - The docker file will be similar to what we used in Assignment 1 with no changes.
 
 - The protocol buffer files will be created as per the requirment of the project and when the script is executed, the docker-compose command will execute and build up the protocol buffer files to create the buffer files using the .proto file.
+
+
+
+# Interface 
+
+### checkboard
+
+- The function takes the hostname of the client requesting as input and sends an array of values around it as output. Going from top right in a clockwise direction so the array will be of size 8. 
+
+- -1 will stand for cannot move either due to no places to move or an existing trainer. 1 for a possible move and 2 for a possible move with pokemon available for capture on the position.
+
+### move
+
+- You send the message movepos which has the row number, column number and hostname as data. The row and column data will be used to move the Trainer or pokemon and the hostname will be used to log their movements. The output will be a flag which says the move has been completed or not.
+
+- There will be seperate cases in case of pokemon and trainers, as pokemon can move into same position as other pokemon but trainers cannot.
+### pokemon\_list
+
+- Takes the trainer name as input and then returns the pokemon it has captured as output. The trainer then stores the information in the pokedex on the pokemon captured.
+
+### client\_path
+
+- Takes the hostname as input and returns the path as output which has been taken by the trainer/pokemon
+
+### trainer\_list
+
+- Takes the pokemon name as input and then returns the trainer that captured it. The pokemon then stores the information that who captured it.
