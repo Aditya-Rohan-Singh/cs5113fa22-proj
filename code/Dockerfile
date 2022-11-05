@@ -33,7 +33,6 @@ COPY . /usr/src/app
 # RUN protoc --python_out=. guessing_game.proto
 # Code below works similarly
 RUN python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. pokemon_game.proto
-
 EXPOSE 22
 EXPOSE 80
 EXPOSE 50050-50100
