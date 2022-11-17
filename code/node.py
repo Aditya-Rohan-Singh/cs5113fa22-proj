@@ -5,6 +5,10 @@ import pokemon_game_pb2_grpc
 import pokemon_game_pb2
 import concurrent
 import json
+import numpy as np
+
+
+rng = np.random.default_rng()
 
 class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
     def checkboard(self,request,context):
@@ -25,10 +29,52 @@ def serve():
     server.start()
     with open('config.json') as json_file:
         data = json.load(json_file)
-    N = data['N']
+    n = data['N']
     T = data['T']
     P = data['P']
-    print(N,T,P)
+    json_file.close()
+
+    #create board
+    N = [[0]*n for _ in range(n)]
+    
+    #populate trainers
+    idx = 0
+    while idx != T:
+        i = rng.integers(low=0, high=n-1, size=1)[0]
+        j = rng.integers(low=0, high=n-1, size=1)[0]
+        if N[i][j]==0:
+            upd = 'T' + str(idx+1)
+            N[i][j] = upd
+            idx = idx + 1
+
+    #populate pokemon
+    idx1 = 0
+    while idx1 != P:
+        i = rng.integers(low=0, high=n-1, size=1)[0]
+        j = rng.integers(low=0, high=n-1, size=1)[0]
+        if N[i][j]==0:
+            upd = 'P' + str(idx1+1)
+            N[i][j] = upd
+            idx1 = idx1 + 1
+    
+    with open('node-list.json') as json_file:
+        data = json.load(json_file)
+    for i in range(n):
+        row = ""
+        for j in range(n):
+            if(N[i][j] == 0):
+                row = row + "|__|"
+            else:
+                row = row + "|" + data[N[i][j]] + "|"
+        print(row)
+    #with open('node-list.json') as json_file:
+    #    data = json.load(json_file)
+    #for key in data:
+    #    print(key, '->', data[key])
+    
+
+
+    # Try case to exit server
     try :
         while True:
             time.sleep(10)

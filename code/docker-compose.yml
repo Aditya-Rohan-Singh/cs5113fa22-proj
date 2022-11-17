@@ -10,36 +10,36 @@ services:
   client1:
     build: .
     hostname: trainer1
-    container_name: Trainer1
+    container_name: T1
     networks:
       - default
   client2:
     build: .
     hostname: trainer2
-    container_name: Trainer2
+    container_name: T2
     networks:
       - default
   client3:
     build: .
     hostname: trainer3
-    container_name: Trainer3
+    container_name: T3
     networks:
       - default
   client4:
     build: .
     hostname: pokemon1
-    container_name: Pokemon1
+    container_name: P1
     networks:
       - default
   client5:
     build: .
     hostname: pokemon2
-    container_name: Pokemon2
+    container_name: P2
     networks:
       - default
   client6:
     build: .
     hostname: pokemon3
-    container_name: Pokemon3
+    container_name: P3
     networks:
       - default

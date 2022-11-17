@@ -14,26 +14,32 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     f = open("docker-compose.yml","w")
-    f1 = open("node-list.txt","w")
+    f1 = open("node-list.json","w")
     f2 = open("config.json","w")
-    dict = {'N':args.N, "T":args.T, "P": args.N}
+    dict = {'N':args.N, "T":args.T, "P": args.P}
     json_file = json.dumps(dict)
     f2.write(json_file)
+    f2.close()
 
+    ## Starting docker-compose.yml write
     f.write("version: '3.7'\n\n")
     f.write("services:\n  server:\n    build: .\n    hostname: server\n    container_name: Server\n    networks:\n      - default")
     
-
+    dict ={}
     for idx in range(args.T):
         row = "\n  client"+str(idx+1)+":\n    build: .\n    hostname: trainer" + str(idx+1) +"\n    container_name: T" + str(idx+1) + "\n    networks:\n      - default"
         f.write(row)
-        f1.write("Trainer" + str(idx+1) + ": " + trainer_list[idx]+ "\n")
+        dict["T"+str(idx+1)] = str(trainer_list[idx])
+        #f1.write("Trainer" + str(idx+1) + ": " + trainer_list[idx]+ "\n")
 
     for idx1 in range(args.P):
         row =  "\n  client"+str(args.T+idx1+1)+":\n    build: .\n    hostname: pokemon" + str(idx1+1) + "\n    container_name: P" + str(idx1+1) + "\n    networks:\n      - default"
         f.write(row)
-        f1.write("Pokemon" + str(idx1+1) + ": " + pokemon_list[idx1]+ "\n")
+        #f1.write("Pokemon" + str(idx1+1) + ": " + pokemon_list[idx1]+ "\n")
+        dict["P"+str(idx1+1)] = str(pokemon_list[idx1])
 
+    json1 = json.dumps(dict)
+    f1.write(json1)
     f.close()
     f1.close()
         
