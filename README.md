@@ -14,11 +14,16 @@ Final Project for cs5113
 |12/01/22|Project Submission|Not Started|
 
 
+## Execution steps
+- ./pokemon.py --N 9 --T 3 --P 3
+
+- docker-compose up --build
+
 ## First version logging
 
 - The function display\_board() when called will display the current board from the server. It stores the hostnames of the server in a n\*n matrix and while displaying retrieves the emoji assigned to each node from a json file called node-list.json while stores a dictionary in the format hostname:emoji 
 
-
+- Note: The GIF might take some to load. But it is there in the README.md
 
 
 ![](https://github.com/Aditya-Rohan-Singh/cs5113fa22-proj/blob/main/milestone3.gif)
@@ -36,19 +41,19 @@ Final Project for cs5113
 - The script pokemon.py will use T and P to dynamically add the number of pokemon P and trainers T by adding the below lines of code to docker-compose.yml:
 client[i]:
     build: .
-    hostname: <emoji>
-    container_name: <emoji>
+    hostname: t/p<idx>
+    container_name: Trainer/Pokemon<idx>
     networks:
       - default  
 where i is an index tracking the number of P and T.
 
-- The script will utilize a list of pre-saved 25 human emoji and animal emoji to assign hostname to Trainer and POkemon respectively.
+- The script will utilize a list of pre-saved 10 human emoji and animal emoji to assign hostname to Trainer and POkemon respectively.
 
 - The script will also create a list of Trainers and Pokemon as per the given user input and store it with their respective emoji in a json file called node-list.json
 
-- Once the docker-compose.yml file is dynamically created, the script will utilize the subprocess package to execute the command "docker-compose up --build: which will create the mentioned containers in the docker-compose.yml file that was dynamically created based on user input.
-
-- The docker file will be similar to what we used in Assignment 1 with no changes.
+- Once the docker-compose.yml file is dynamically created, the script will utilize the subprocess package to execute the command "docker-compose up --build: which will create the mentioned containers in the docker-compose.yml file that was dynamically created based on user input. (Still needs to be implemented
+)
+- The docker file will be similar to what we used in Assignment 1 with no changes except the proto file name.
 
 - The protocol buffer files will be created as per the requirment of the project and when the script is executed, the docker-compose command will execute and build up the protocol buffer files to create the buffer files using the .proto file.
 
