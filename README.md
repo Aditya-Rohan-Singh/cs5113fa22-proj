@@ -8,10 +8,15 @@ Final Project for cs5113
 |-----|-----|------|
 |11/01/22|Create dynamic docker-compose.yml file based on user input|Complete|
 |11/03/22|Protos and Interface Design|Complete|
-|11/15/22|Trainer and Pokemon move across board|In-Progress|
-|11/17/22|First Version Logging|Not Started|
+|11/17/22|First Version Logging|Complete|
+|11/20/22|Trainer and Pokemon move across board|In-Progress|
 |11/25/22|Trainer Capturing pokemon|Not Started|
 |12/01/22|Project Submission|Not Started|
+
+
+## First version logging
+
+![](https://github.com/Aditya-Rohan-Singh/cs5113fa22-proj/blob/main/milestone3.gif)
 
 
 ## Emoji Chooser
