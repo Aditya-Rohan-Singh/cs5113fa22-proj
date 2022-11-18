@@ -9,6 +9,7 @@ import numpy as np
 
 
 rng = np.random.default_rng()
+global N
 
 class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
     def checkboard(self,request,context):
@@ -33,7 +34,7 @@ def serve():
     T = data['T']
     P = data['P']
     json_file.close()
-
+    global N
     #create board
     N = [[0]*n for _ in range(n)]
     
@@ -56,7 +57,10 @@ def serve():
             upd = 'P' + str(idx1+1)
             N[i][j] = upd
             idx1 = idx1 + 1
-    
+    display_board(n)
+
+def display_board(n):
+    global N
     with open('node-list.json') as json_file:
         data = json.load(json_file)
     for i in range(n):
@@ -67,11 +71,7 @@ def serve():
             else:
                 row = row + "|" + data[N[i][j]] + "|"
         print(row)
-    #with open('node-list.json') as json_file:
-    #    data = json.load(json_file)
-    #for key in data:
-    #    print(key, '->', data[key])
-    
+    json_file.close()
 
 
     # Try case to exit server
