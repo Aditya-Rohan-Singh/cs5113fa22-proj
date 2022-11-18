@@ -16,6 +16,11 @@ Final Project for cs5113
 
 ## First version logging
 
+- The function display\_board() when called will display the current board from the server. It stores the hostnames of the server in a n\*n matrix and while displaying retrieves the emoji assigned to each node from a json file called node-list.json while stores a dictionary in the format hostname:emoji 
+
+
+
+
 ![](https://github.com/Aditya-Rohan-Singh/cs5113fa22-proj/blob/main/milestone3.gif)
 
 
@@ -39,7 +44,7 @@ where i is an index tracking the number of P and T.
 
 - The script will utilize a list of pre-saved 25 human emoji and animal emoji to assign hostname to Trainer and POkemon respectively.
 
-- The script will also create a list of Trainers and Pokemon as per the given user input 
+- The script will also create a list of Trainers and Pokemon as per the given user input and store it with their respective emoji in a json file called node-list.json
 
 - Once the docker-compose.yml file is dynamically created, the script will utilize the subprocess package to execute the command "docker-compose up --build: which will create the mentioned containers in the docker-compose.yml file that was dynamically created based on user input.
 
