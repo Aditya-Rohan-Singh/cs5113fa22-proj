@@ -30,7 +30,9 @@ message name{
 // It returns available movements on the space around it in the form of an array. -1 for no move, 1 for possible move and 2 for pokemon in the space
 // Does not return the whole board just the movement space around it.
 message checkpos{
-	repeated int32 checkboard = 1;
+	repeated int32 pos_array = 1;
+	int32 pokemon_left = 2;
+	int32 lock = 3; 
 }
 
 // Returns the trained that captured the pokemon.

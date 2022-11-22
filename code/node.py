@@ -9,18 +9,29 @@ import numpy as np
 
 
 rng = np.random.default_rng()
-global N
+global N, n, no_of_pokemon, lock_flag
+
+def get_position():
 
 class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
     def checkboard(self,request,context):
-        print("blah")
+        
+        mov = [0]*8
+        lock_flag = 1
+        return(pokemon_game_pb2.checkpos(pos_array = mov, flag = no_of_pokemon))
 
 def pokemon():
-    print("I'm up")
+    with grpc.insecure_channel("server:50051") as channel:
+        stub = pokemon_game_pb2_grpc.PokemonGameStub(channel)
+        flag = 0
+        hname = socket.gethostname()
+        while (flag != 1)
+             response = stub.checkboard(pokemon_game_pb2.name(name = hname),wait_for_ready=True)
 
 
 def trainer():
-    print("I'm up")
+     with grpc.insecure_channel("server:50051") as channel:
+         stub = pokemon_game_pb2_grpc.PokemonGameStub(channel)
 
 
 def serve():
@@ -30,11 +41,15 @@ def serve():
     server.start()
     with open('config.json') as json_file:
         data = json.load(json_file)
+    global n , no_of_pokemon, N, lock_flag
     n = data['N']
     T = data['T']
     P = data['P']
+    no_of_pokemon = P
     json_file.close()
-    global N
+
+    #define file lock
+    lock_flag = 0
     #create board
     N = [[0]*n for _ in range(n)]
     
