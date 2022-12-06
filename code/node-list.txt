@@ -1,6 +1,0 @@
-Trainer1: 💀
-Trainer2: 🧒
-Trainer3: 👦
-Pokemon1: 🐒
-Pokemon2: 🦍
-Pokemon3: 🐺
