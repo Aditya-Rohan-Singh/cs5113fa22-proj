@@ -24,7 +24,7 @@ message movecomplete{
 
 // Hostname
 message name{
-	string hostname = 1;
+	string status = 1;
 }
 
 // It returns available movements on the space around it in the form of an array. -1 for no move, 1 for possible move and 2 for pokemon in the space
@@ -33,6 +33,8 @@ message checkpos{
 	repeated int32 pos_array = 1;
 	int32 pokemon_left = 2;
 	int32 lock = 3; 
+	repeated int32 cur_pos = 4;
+	int32 alive = 5;
 }
 
 // Returns the trained that captured the pokemon.

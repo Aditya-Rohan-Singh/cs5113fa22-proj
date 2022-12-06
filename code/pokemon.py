@@ -8,9 +8,9 @@ pokemon_list = ["\U0001F412", "\U0001F98D", "\U0001F43A", "\U0001F98A", "\U0001F
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--N', type=int, choices = range(1,10), required=True)
-    parser.add_argument('--T', type=int, choices = range(1,10), required=True)
-    parser.add_argument('--P', type=int, choices = range(1,10), required=True)
+    parser.add_argument('--N', type=int, choices = range(1,21), required=True)
+    parser.add_argument('--T', type=int, choices = range(1,30), required=True)
+    parser.add_argument('--P', type=int, choices = range(1,30), required=True)
 
     args = parser.parse_args()
     f = open("docker-compose.yml","w")
@@ -27,16 +27,16 @@ if __name__ == '__main__':
     
     dict ={}
     for idx in range(args.T):
-        row = "\n  client"+str(idx+1)+":\n    build: .\n    hostname: trainer" + str(idx+1) +"\n    container_name: T" + str(idx+1) + "\n    networks:\n      - default"
+        row = "\n  client"+str(idx+1)+":\n    build: .\n    hostname: trainer" + str(idx+1) +"\n    container_name: trainer" + str(idx+1) + "\n    networks:\n      - default"
         f.write(row)
-        dict["T"+str(idx+1)] = str(trainer_list[idx])
+        dict["trainer"+str(idx+1)] = str(trainer_list[idx])
         #f1.write("Trainer" + str(idx+1) + ": " + trainer_list[idx]+ "\n")
 
     for idx1 in range(args.P):
-        row =  "\n  client"+str(args.T+idx1+1)+":\n    build: .\n    hostname: pokemon" + str(idx1+1) + "\n    container_name: P" + str(idx1+1) + "\n    networks:\n      - default"
+        row =  "\n  client"+str(args.T+idx1+1)+":\n    build: .\n    hostname: pokemon" + str(idx1+1) + "\n    container_name: pokemon" + str(idx1+1) + "\n    networks:\n      - default"
         f.write(row)
         #f1.write("Pokemon" + str(idx1+1) + ": " + pokemon_list[idx1]+ "\n")
-        dict["P"+str(idx1+1)] = str(pokemon_list[idx1])
+        dict["pokemon"+str(idx1+1)] = str(pokemon_list[idx1])
 
     json1 = json.dumps(dict)
     f1.write(json1)
