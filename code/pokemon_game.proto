@@ -19,12 +19,12 @@ message movepos{
 }
 // Flag to store if move is complete. Returns 1 if only move is done, returns 2 if pokemon captured on the move as well
 message movecomplete{
-	int32 movecompleted = 1;
+	int32 status = 1;
 }
 
 // Hostname
 message name{
-	string status = 1;
+	string hostname = 1;
 }
 
 // It returns available movements on the space around it in the form of an array. -1 for no move, 1 for possible move and 2 for pokemon in the space

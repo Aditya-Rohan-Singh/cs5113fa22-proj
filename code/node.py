@@ -7,6 +7,7 @@ import concurrent
 import json
 import numpy as np
 import pickle
+import random
 
 rng = np.random.default_rng()
 global N, n, no_of_pokemon, lock_flag
@@ -36,32 +37,49 @@ def possible_moves(i,j,hostname1):
     if(hostname1[:-1]=='pokemon'):
         pokemon_moves = [-1 if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n)  else 2 if N[k1,k2]['trainer'][:-1] == 'trainer' else 0 if(len(N[k1,k2]['pokemon']) > 1) else 0 for (k1,k2) in list_array ]
     elif(hostname1[:-1]=='trainer'):
-        pokemon_moves = [-1 if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n)  else -1 if N[k1,k2]['trainer'][:-1] == 'trainer' else 1 if(len(N[k1,k2]['pokemon']) > 1) else 0 for (k1,k2) in list_array ]
+        pokemon_moves = [-1 if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n)  else -1 if N[k1,k2]['trainer'][:-1] == 'trainer' else 1 if(len(N[k1,k2]['pokemon']) > 0) else 0 for (k1,k2) in list_array ]
 
     return(pokemon_moves)
 
 class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
     def checkboard(self,request,context):
         global no_of_pokemon
-        #mov = [0]*8
         lock_flag = 1
         hostname1 = request.hostname
         old_i, old_j, caught = get_position(hostname1)
         position = [old_i,old_j]    
-        no_of_pokemon = 0
         if caught != -1:
             mov = possible_moves(old_i,old_j,hostname1)
         else:
             mov = [0]*8
-        return(pokemon_game_pb2.checkpos(pos_array = mov, pokemon_left = no_of_pokemon, lock = lock_flag, cur_pos = [old_i,old_j], alive = caught))
+        return(pokemon_game_pb2.checkpos(pos_array = mov, pokemon_left = no_of_pokemon, lock = lock_flag, cur_pos = position, alive = caught))
 
     def move(self,request,context):
         
         com = 1
         return(pokemon_game_pb2.movecompleted(status = com))
 
-def pos_move(hostname1, position, current):
+def pos_move(hostname1, pokemon_moves, current):
+    moves = []
+    i,j = current[0],current[1]
+    list_array = [[i-1,j-1], [i-1,j], [i-1,j+1], [i,j+1], [i+1,j+1], [i+1,j], [i+1,j-1], [i,j-1]]
+    if 1 in pokemon_moves:
+        for idx, value in enumerate(pokemon_moves):
+            if(value == 1):
+                moves.append(idx)
+    elif 0 in pokemon_moves:
+        for idx, value in enumerate(pokemon_moves):
+            if(value == 0):
+                moves.append(idx)
+    else:
+        moves = []
     
+    if len(moves) > 0:
+        new_i, new_j = list_array[random.choice(moves)]
+    else:
+        new_i, new_j = i, j
+    
+    return(new_i, new_j)
 
 def pokemon():
     with grpc.insecure_channel("server:50051") as channel:
@@ -72,9 +90,9 @@ def pokemon():
             response = stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
             if(response.alive == -1):
                 flag = 0
-            else
+            else:
                 flag = response.pokemon_left
-                
+                flag = 0 # remove this later
             print(response.pos_array, response.cur_pos)
 
 def trainer():
@@ -85,11 +103,14 @@ def trainer():
         while (flag!=0):
             response = stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
             flag = response.pokemon_left
-            if(response.alive == -1 or response.pokemon_left == 0)
+            if(response.alive == -1 or response.pokemon_left == 0):
                 flag = 0
+                new_x, new_y = 0,0
             else:
                 flat = response.pokemon_left
-            print(response.pos_array,response.cur_pos)
+                new_x, new_y = pos_move(hname, response.pos_array, response.cur_pos)
+                flag = 0 #remove this later
+            print(response.pos_array,response.cur_pos,[new_x,new_y])
 
 
 def serve():
