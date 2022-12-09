@@ -32,7 +32,7 @@ message name{
 message checkpos{
 	repeated int32 pos_array = 1;
 	int32 pokemon_left = 2;
-	int32 lock = 3; 
+	string lock = 3; 
 	repeated int32 cur_pos = 4;
 	int32 alive = 5;
 }
