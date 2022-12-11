@@ -18,7 +18,6 @@ def get_position(hostname1):
     if(hostname1[:-1]=='trainer'):
         for i,k in enumerate(board):
             if(list(board.values())[i]['trainer'] == hostname1):
-                print(hostname1)
                 x,y = k
                 hostname_caught = 0
                 break;
@@ -26,7 +25,6 @@ def get_position(hostname1):
     elif(hostname1[:-1]=='pokemon'):
         for idx,k in enumerate(board):
             if (hostname1 in list(board.values())[idx]['pokemon']):
-                print(hostname1)
                 x,y = k
                 hostname_caught = 0
                 break;
@@ -57,8 +55,12 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
             position = [old_i,old_j]    
             if caught != -1:
                 mov = possible_moves(old_i,old_j,hostname1)
-            else:
+                if(no_of_pokemon==0):
+                    caught = -1
+                    lock_flag = 'server'
+            elif caught == -1:
                 mov = [0]*8
+                lock_flag = 'server'
             return(pokemon_game_pb2.checkpos(pos_array = mov, pokemon_left = no_of_pokemon, lock = lock_flag, cur_pos = position, alive = caught))
         else:
             mov = [0]*8
@@ -71,26 +73,69 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
         if(lock_flag==request.hostname):
             with open('board.pickle', 'rb') as handle:
                 board = pickle.load(handle)
-
+            with open('pokedex.pickle','rb') as handle:
+                poked = pickle.load(handle)
+            
             #update move
-
+            if(request.hostname[:-1] == 'trainer'):
+                old_i, old_j, caught = get_position(request.hostname)
+                board[(old_i,old_j)]['trainer'] = ''
+                board[(request.row, request.column)]['trainer']= request.hostname
+                #If a capture request is sent out
+                global no_of_pokemon
+                if request.capture == 1:
+                    if(len(list(board[(request.row,request.column)]['pokemon'])) > 0):
+                        if len(poked[request.hostname]) > 0:
+                            value = 0
+                            for val in list(board[(request.row,request.column)]['pokemon']):
+                                value = value + 1
+                            no_of_pokemon = no_of_pokemon - value#len(board[(request.row,request.column)]['pokemon'])
+                            new_list = poked[request.hostname]
+                            new_list.extend(board[(request.row,request.column)]['pokemon'])
+                            poked[request.hostname] = new_list
+                        else:
+                            poked[request.hostname] = board[(request.row,request.column)]['pokemon']
+                            no_of_pokemon = no_of_pokemon - 1 
+                        board[(request.row,request.column)]['pokemon'] = []
+                        #no_of_pokemon = no_of_pokemon - 1#len(poked[request.hostname])
+            elif(request.hostname[:-1] == 'pokemon'):
+                #Update old position without the pokemon name
+                old_i, old_j, caught = get_position(request.hostname)
+                pokemon_list = list(board[(old_i, old_j)]['pokemon'])
+                pokemon_list.remove(request.hostname)
+                board[old_i, old_j]['pokemon'] = pokemon_list
+                if len(list(board[(request.row, request.column)]['pokemon'])) > 0:
+                    new_list = list(board[request.row, request.column]['pokemon'])
+                    new_list.append(request.hostname)
+                else:
+                    new_list = [request.hostname]
+                print(new_list)
+                board[(request.row, request.column)]['pokemon'] = new_list
+                
             #updagte path 
             with open('path.pickle', 'rb') as handle:
                 path = pickle.load(handle)
             row = path[request.hostname]
             row.append([request.row, request.column])
             path[request.hostname] = row
+
+            print(poked)
+
             with open('path.pickle', 'wb') as handle:
-                pickle.dump(path,handle, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(path, handle, protocol=pickle.HIGHEST_PROTOCOL)
             print(path)
 
+            with open('pokedex.pickle','wb') as handle1:
+                pickle.dump(poked, handle1,  protocol=pickle.HIGHEST_PROTOCOL)
 
-            with open('board.pickle', 'wb') as handle:
-                pickle.dump(board, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+            with open('board.pickle', 'wb') as handle2:
+                pickle.dump(board, handle2, protocol=pickle.HIGHEST_PROTOCOL)
+            
+            global n
+            display_board(n)
             lock_flag = 'server'
             com = 1
-            print('released')
+            print('Lock released', lock_flag, no_of_pokemon)
         else:
             com = 0
         return(pokemon_game_pb2.movecomplete(status = com))
@@ -157,19 +202,23 @@ def pokemon():
         hname = socket.gethostname()
         while (flag != 0):
             response = stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
-            print(response.lock)
-            if(response.lock == hname):
-                if(response.alive == -1):
-                    flag = 0
+            print("Lock owner:", response.lock)
+            if(response.alive !=-1):
+                if(response.lock == hname):
+                    if(response.alive == -1):
+                        flag = 0
+                        new_x, new_y = -1, -1
+                    else:
+                        flag = response.pokemon_left
+                        new_x, new_y = pokemon_pos_move(hname, response.pos_array, response.cur_pos)
+                        response1 = stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname), wait_for_ready=True)
+                        print("Pokemon", response.pos_array, response.cur_pos, [new_x, new_y], response1.status)
                 else:
-                    flag = response.pokemon_left
-                    new_x, new_y = pokemon_pos_move(hname, response.pos_array, response.cur_pos)
-                    flag = 0 # remove this later
-                    response1 = stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname), wait_for_ready=True)
-                
-                print(response.pos_array, response.cur_pos, [new_x, new_y], response1.status)
-            else:
-                print("Data locked")
+                    pass
+                    #print("Data locked")
+            elif(response.alive == -1):
+                print("Caught")
+                flag = 0
                 #pass
 
 def trainer():
@@ -177,23 +226,28 @@ def trainer():
         stub = pokemon_game_pb2_grpc.PokemonGameStub(channel)
         flag = 1
         hname = socket.gethostname()
+        my_pokemon_list = []
         while (flag!=0):
             response = stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
             flag = response.pokemon_left
-            if(response.lock == hname):
-                if(response.alive == -1 or response.pokemon_left == 0):
-                    flag = 0
-                    new_x, new_y = 0,0
+            print("Lock owner:", response.lock)
+            if(response.alive!=-1):
+                if(response.lock == hname):
+                    if(response.alive == -1 or response.pokemon_left == 0):
+                        flag = 0
+                        new_x, new_y = -1, -1
+                    else:
+                        flag = response.pokemon_left
+                        new_x, new_y, capture_init = trainer_pos_move(hname, response.pos_array, response.cur_pos)
+                        response1 = stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname, capture = capture_init), wait_for_ready=True)
+                        print("Trainer", response.pos_array,response.cur_pos,[new_x,new_y],response1.status, response.pokemon_left)
                 else:
-                    flag = response.pokemon_left
-                    new_x, new_y, capture = trainer_pos_move(hname, response.pos_array, response.cur_pos)
-                    flag = 0 #remove this later
-                    response1 = stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname), wait_for_ready=True)
-                
-                print(response.pos_array,response.cur_pos,[new_x,new_y],response1.status)
-            else:
-                print("Data locked")
+                    pass
+                #print("Data locked")
                 #pass
+            elif(response.alive == -1):
+                print("All pokemon caught")
+                flag = 0
 
 def serve():
     server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=10))
@@ -272,9 +326,7 @@ def serve():
     with open('board.pickle', 'wb') as handle:
         pickle.dump(N, handle, protocol=pickle.HIGHEST_PROTOCOL)
     display_board(n)
-    #print(N)
-    #print(pokedex)
-    print(path)
+
     server.start()
      # Try case to exit server
     try :
@@ -291,17 +343,18 @@ def display_board(n):
 
     with open('board.pickle', 'rb') as handle:
         board = pickle.load(handle)
+
     for i2 in range(n):
-        row = ""
+        row = "|"
         for j2 in range(n):
             if len(board[i2,j2]['trainer']) > 0:
-                row = row + "||" + data[board[i2,j2]['trainer']]
+                row = row + data[board[i2,j2]['trainer']] + "|"
             elif len(board[i2,j2]['pokemon']) > 0:
-                row = row + "||"
-                for val in list(board[i2,j2]['pokemon']):
-                    row = row + data[val] + "|"
+                #for val in list(board[i2,j2]['pokemon']):
+                val = list(board[i2,j2]['pokemon'])[0]    
+                row = row + data[val] + "|"
             else:
-                row = row + "|__|"
+                row = row + "__|"
         print(row)
 
 

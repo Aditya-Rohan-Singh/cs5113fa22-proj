@@ -16,6 +16,7 @@ message movepos{
 	int32 row = 1;
 	int32 column = 2;
 	string hostname = 3;
+	int32 capture = 4;
 }
 // Flag to store if move is complete. Returns 1 if only move is done, returns 2 if pokemon captured on the move as well
 message movecomplete{
