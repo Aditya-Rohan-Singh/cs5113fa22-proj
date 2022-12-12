@@ -8,7 +8,7 @@ service PokemonGame{
 	rpc Move (movepos) returns (movecomplete) {}
 	rpc pokemon_list (name) returns (pokemon_captured) {}
 	rpc client_path (name) returns (path) {}
-	rpc trainer_list (name) returns (pokemon_captured) {}
+	rpc trainer_list (name) returns (trainer_name) {}
 
 }
 // (row, column) position to move to and the hostname to log the movement detail
