@@ -91,7 +91,6 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
                         if len(poked[request.hostname]) > 0:
                             value = 0
                             for val in list(board[(request.row,request.column)]['pokemon']):
-                                
                                 value = value + 1
                             no_of_pokemon = no_of_pokemon - value#len(board[(request.row,request.column)]['pokemon'])
                             new_list = poked[request.hostname]
@@ -148,7 +147,7 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
         return(pokemon_game_pb2.pokemon_captured(pokemon_name = pokemon_li))
     
     def trainer_list(self, request,contect):
-        with open('pokedex.picle', 'rb') as handle:
+        with open('pokedex.pickle', 'rb') as handle:
             poked = pickle.load(handle)
 
         for k,v in poked.items():
@@ -227,14 +226,14 @@ async def pokemon():
                         flag = response.pokemon_left
                         new_x, new_y = pokemon_pos_move(hname, response.pos_array, response.cur_pos)
                         response1 = await stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname), wait_for_ready=True)
-                        #time.sleep(1)
+                        time.sleep(1)
                         print("I made a move")
                 else:
                     pass
                     #print("Data locked")
             elif(response.alive == -1):
-                #response2 = stub.trainer_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
-                #print("Caught by:", response.trainer)
+                response2 = await stub.trainer_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
+                print("Caught by:", response2.trainer)
                 flag = 0
                 #pass
 
@@ -256,18 +255,18 @@ async def trainer():
                         flag = response.pokemon_left
                         new_x, new_y, capture_init = trainer_pos_move(hname, response.pos_array, response.cur_pos)
                         response1 = await stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname, capture = capture_init), wait_for_ready=True)
-                        #time.sleep(1)
+                        time.sleep(1)
                         print("I made a move")
                 else:
                     pass
                 #print("Data locked")
                 #pass
             elif(response.alive == -1):
-                #response2 = stub.pokemon_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
-                #val = ''
-                #for x in response2.pokemon_name:
-                #    val = val + str(x) + " "
-                #print("Pokemon Caught:", val)
+                response2 = await stub.pokemon_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
+                val = ''
+                for x in response2.pokemon_name:
+                    val = val + str(x) + " "
+                print("Pokemon Caught:", val)
                 flag = 0
 
 async def serve():
@@ -356,6 +355,7 @@ async def serve():
     #        time.sleep(10)
     #except KeyboardInterrupt:
     #    server.stop(0)
+    display_board(n)
 
 def display_board(n):
     global N
