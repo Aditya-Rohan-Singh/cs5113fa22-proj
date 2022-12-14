@@ -18,17 +18,19 @@ global N, n, no_of_pokemon, lock_flag, pokedex, path
 def get_position(hostname1):
     with open('board.pickle', 'rb') as handle:
         board = pickle.load(handle)
-    if(hostname1[:-1]=='trainer'):
+    if(hostname1.startswith('trainer')):
         for i,k in enumerate(board):
             if(list(board.values())[i]['trainer'] == hostname1):
                 x,y = k
+                #print(k)
                 hostname_caught = 0
                 break;
 
-    elif(hostname1[:-1]=='pokemon'):
+    elif(hostname1.startswith('pokemon')):
         for idx,k in enumerate(board):
             if (hostname1 in list(board.values())[idx]['pokemon']):
                 x,y = k
+                #print(k)
                 hostname_caught = 0
                 break;
             else:
@@ -40,12 +42,26 @@ def possible_moves(i,j,hostname1):
     list_array = [[i-1,j-1], [i-1,j], [i-1,j+1], [i,j+1], [i+1,j+1], [i+1,j], [i+1,j-1], [i,j-1]]
     with open('board.pickle', 'rb') as handle:
         board = pickle.load(handle)
-
+    pokemon_moves = []
     if(hostname1[:-1]=='pokemon'):
-        pokemon_moves = [-1 if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n)  else 2 if board[k1,k2]['trainer'][:-1] == 'trainer' else 0 if(len(board[k1,k2]['pokemon']) > 1) else 0 for (k1,k2) in list_array ]
+        pokemon_moves = [-1 if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n)  else 2 if board[k1,k2]['trainer'].startswith('trainer') else 0 if(len(board[k1,k2]['pokemon']) > 1) else 0 for (k1,k2) in list_array ]
     elif(hostname1[:-1]=='trainer'):
-        pokemon_moves = [-1 if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n)  else -1 if board[k1,k2]['trainer'][:-1] == 'trainer' else 1 if(len(board[k1,k2]['pokemon']) > 0) else 0 for (k1,k2) in list_array ]
+        #pokemon_moves = [-1 if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n)  else -1 if board[k1,k2]['trainer'][:-1] == 'trainer' else 1 if(len(board[k1,k2]['pokemon']) > 0) else 0 for (k1,k2) in list_array ]
+        
+        for (k1,k2) in list_array:
+            if(k1 < 0 or k1 == n or k2 < 0 or k2 ==n):
+                pokemon_moves.append(-1)
+                continue
+            #if(board[k1,k2]['trainer'][:-1] == 'trainer'):
+            if(board[k1,k2]['trainer'].startswith('trainer')):
+                pokemon_moves.append(-1)
+                continue
+            if(len(board[k1,k2]['pokemon']) > 0):
+                pokemon_moves.append(1)
+            else:
+                pokemon_moves.append(0)
 
+    print(hostname1, pokemon_moves)
     return(pokemon_moves)
 
 class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
@@ -73,14 +89,13 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
 
     def Move(self,request,context):
         global lock_flag
-        if(lock_flag==request.hostname):
-            with open('board.pickle', 'rb') as handle:
-                board = pickle.load(handle)
-            with open('pokedex.pickle','rb') as handle:
-                poked = pickle.load(handle)
-            
+        with open('board.pickle', 'rb') as handle:
+            board = pickle.load(handle)
+        with open('pokedex.pickle','rb') as handle:
+            poked = pickle.load(handle)
+        if(board[(request.row, request.column)]['trainer'] == ''):
             #update move
-            if(request.hostname[:-1] == 'trainer'):
+            if(request.hostname.startswith('trainer')):
                 old_i, old_j, caught = get_position(request.hostname)
                 board[(old_i,old_j)]['trainer'] = ''
                 board[(request.row, request.column)]['trainer']= request.hostname
@@ -100,7 +115,7 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
                             poked[request.hostname] = board[(request.row,request.column)]['pokemon']
                             no_of_pokemon = no_of_pokemon - 1 
                         board[(request.row,request.column)]['pokemon'] = []
-            elif(request.hostname[:-1] == 'pokemon'):
+            elif(request.hostname.startswith('pokemon')):
                 #Update old position without the pokemon name
                 old_i, old_j, caught = get_position(request.hostname)
                 pokemon_list = list(board[(old_i, old_j)]['pokemon'])
@@ -120,7 +135,7 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
                 row = path[request.hostname]
                 row.append([request.row, request.column])
                 path[request.hostname] = row
-            print(poked)
+            print(poked, no_of_pokemon)
 
             with open('path.pickle', 'wb') as handle:
                 pickle.dump(path, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -146,7 +161,7 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
         pokemon_li = poked[request.hostname]
         return(pokemon_game_pb2.pokemon_captured(pokemon_name = pokemon_li))
     
-    def trainer_list(self, request,contect):
+    def trainer_list(self, request,context):
         with open('pokedex.pickle', 'rb') as handle:
             poked = pickle.load(handle)
 
@@ -154,6 +169,16 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
             if request.hostname in list(v):
                 trainer_name = k
         return(pokemon_game_pb2.trainer_name(trainer = trainer_name))
+
+    def client_path(self,request, context):
+        with open('path.pickle','rb') as handle:
+            path = pickle.load(handle)
+
+        path1 = path[request.hostname]
+        print(request.hostname,path1)
+        path_fol = pokemon_game_pb2.path()
+        path_fol = path1
+        return(pokemon_game_pb2.path(path_followed = path_fol))
 
 def trainer_pos_move(hostname1, pokemon_moves, current):
     moves = []
@@ -210,13 +235,15 @@ def pokemon_pos_move(hostname1, pokemon_moves, current):
     
     return(new_i,new_j)
 
-async def pokemon():
-    async with grpc.aio.insecure_channel("server:50051") as channel:
+#async def pokemon():
+def pokemon():
+    #async 
+    with grpc.insecure_channel("server:50051") as channel:
         stub = pokemon_game_pb2_grpc.PokemonGameStub(channel)
         flag = 1
         hname = socket.gethostname()
         while (flag != 0):
-            response = await stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
+            response =  stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
             if(response.alive !=-1):
                 if(response.lock == hname):
                     if(response.alive == -1):
@@ -225,26 +252,27 @@ async def pokemon():
                     else:
                         flag = response.pokemon_left
                         new_x, new_y = pokemon_pos_move(hname, response.pos_array, response.cur_pos)
-                        response1 = await stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname), wait_for_ready=True)
+                        response1 = stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname), wait_for_ready=True)
                         time.sleep(1)
                         print("I made a move")
                 else:
                     pass
-                    #print("Data locked")
             elif(response.alive == -1):
-                response2 = await stub.trainer_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
+                response2 = stub.trainer_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
                 print("Caught by:", response2.trainer)
                 flag = 0
-                #pass
 
-async def trainer():
-    async with grpc.aio.insecure_channel("server:50051") as channel:
+#async def trainer():
+def trainer():
+    #async 
+    with grpc.insecure_channel("server:50051") as channel:
         stub = pokemon_game_pb2_grpc.PokemonGameStub(channel)
         flag = 1
         hname = socket.gethostname()
         my_pokemon_list = []
+        #Initiate infinite loop
         while (flag!=0):
-            response = await stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
+            response = stub.checkboard(pokemon_game_pb2.name(hostname = hname),wait_for_ready=True)
             flag = response.pokemon_left
             if(response.alive!=-1):
                 if(response.lock == hname):
@@ -254,26 +282,32 @@ async def trainer():
                     else:
                         flag = response.pokemon_left
                         new_x, new_y, capture_init = trainer_pos_move(hname, response.pos_array, response.cur_pos)
-                        response1 = await stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname, capture = capture_init), wait_for_ready=True)
+                        response1 = stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname, capture = capture_init), wait_for_ready=True)
                         time.sleep(1)
-                        print("I made a move")
+                        if(response1.status ==1):
+                            print("I made a move")
+                        elif(response1.status == 0):
+                            print("Move failed")
                 else:
                     pass
-                #print("Data locked")
-                #pass
             elif(response.alive == -1):
-                response2 = await stub.pokemon_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
+                response2 = stub.pokemon_list(pokemon_game_pb2.name(hostname = hname), wait_for_ready=True)
                 val = ''
                 for x in response2.pokemon_name:
                     val = val + str(x) + " "
                 print("Pokemon Caught:", val)
+                #response3 = await stub.client_path(pokemon_game_pb2.name(hostname = hname), wait_for_ready = True)
+                #val = ''
+                #for x in response3.path_followed:
+                #    val = val + str(x) + "->"
+                #print("Path followed:", val )
                 flag = 0
 
-async def serve():
-    server = grpc.aio.server(concurrent.futures.ThreadPoolExecutor(max_workers=20))
+#async 
+def serve():
+    server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=20))
     pokemon_game_pb2_grpc.add_PokemonGameServicer_to_server(PokemonGame(),server)
     server.add_insecure_port('server:50051')
-    #server.start()
     with open('config.json') as json_file:
         data = json.load(json_file)
     global n , no_of_pokemon, N, lock_flag, pokedex, path
@@ -347,16 +381,18 @@ async def serve():
         pickle.dump(N, handle, protocol=pickle.HIGHEST_PROTOCOL)
     display_board(n)
 
-    await server.start()
+    #await 
+    server.start()
      # Try case to exit server
-    await server.wait_for_termination()
-    #try :
-    #    while True:
-    #        time.sleep(10)
-    #except KeyboardInterrupt:
-    #    server.stop(0)
+    #await server.wait_for_termination()
+    try :
+        while True:
+            time.sleep(10)
+    except KeyboardInterrupt:
+        server.stop(0)
     display_board(n)
 
+#Displays the board
 def display_board(n):
     global N
     with open('node-list.json') as json_file:
@@ -369,11 +405,13 @@ def display_board(n):
         row = "|"
         for j2 in range(n):
             if len(board[i2,j2]['trainer']) > 0:
-                row = row + data[board[i2,j2]['trainer']] + "|"
+                #row = row + data[board[i2,j2]['trainer']] + "|"
+                row = row + board[i2,j2]['trainer'] + "|"
             elif len(board[i2,j2]['pokemon']) > 0:
                 #for val in list(board[i2,j2]['pokemon']):
-                val = list(board[i2,j2]['pokemon'])[0]    
-                row = row + data[val] + "|"
+                val = list(board[i2,j2]['pokemon'])[0] 
+                row = row + val + "|"
+                #row = row + data[val] + "|"
             else:
                 row = row + "__|"
         print(row)
@@ -382,12 +420,15 @@ def display_board(n):
 if __name__ == '__main__':
     hostname = socket.gethostname()
     if socket.gethostname() == 'server':
-        asyncio.run(serve())
+        #asyncio.run(serve())
+        serve()
     else:
-        hostname = hostname[:-1]
-        if hostname == "trainer":
+        #hostname = hostname[:-1]
+        if hostname.startswith('trainer'):# == "trainer":
             time.sleep(1)
-            asyncio.run(trainer())
-        elif hostname == "pokemon":
+            #asyncio.run(trainer())
+            trainer()
+        elif hostname.startswith('pokemon'):# == "pokemon":
             time.sleep(1)
-            asyncio.run(pokemon())
+            #asyncio.run(pokemon())
+            pokemon()

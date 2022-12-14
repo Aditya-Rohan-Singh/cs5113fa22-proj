@@ -48,6 +48,9 @@ message pokemon_captured{
 }
 
 //Returns an array of the path followed by the hostname. The array will be of the from like 12. where 1 is the row number and 2 the column number
+message pos{
+	repeated int32 xy = 1;
+}
 message path{
-	repeated int32 path_followed = 1;
+	repeated pos path_followed = 1;
 }
