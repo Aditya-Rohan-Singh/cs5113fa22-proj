@@ -114,6 +114,10 @@ where i is an index tracking the number of P and T.
 
 - Takes the pokemon name as input and then returns the trainer that captured it. The pokemon then stores the information that who captured it.
 
+### caught\_location
+
+- Takes the pokemon name as input and returns the location it was captured at. The trainer is calling this function.
+
 # Other functions used by client
 
 ### get\_position
