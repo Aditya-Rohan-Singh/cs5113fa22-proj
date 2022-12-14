@@ -113,12 +113,9 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
                             poked[request.hostname] = new_list
                             for val in list(board[(request.row,request.column)]['pokemon']):
                                 catch[val] = [request.row,request.column]
-                                print(catch[val])
                         else:
                             val = board[(request.row, request.column)]['pokemon'][0]
-                            print(val)
                             catch[val] = [request.row,request.column]
-                            print(catch)
                             poked[request.hostname] = board[(request.row,request.column)]['pokemon']
                             no_of_pokemon = no_of_pokemon - 1
                         
@@ -193,7 +190,6 @@ class PokemonGame(pokemon_game_pb2_grpc.PokemonGameServicer):
     def caught_location(self, request, context):
         with open('catch.pickle','rb') as handle:
             catch = pickle.load(handle)
-        print(catch)
         (x1,y1) = catch[request.hostname]
         return(pokemon_game_pb2.pos(r = x1, c = y1))
 
@@ -268,7 +264,6 @@ async def pokemon():
                         flag = response.pokemon_left
                         new_x, new_y = pokemon_pos_move(hname, response.pos_array, response.cur_pos)
                         response1 = await stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname), wait_for_ready=True)
-                        time.sleep(1)
                         print("I made a move")
                 else:
                     pass
@@ -297,7 +292,6 @@ async def trainer():
                         flag = response.pokemon_left
                         new_x, new_y, capture_init = trainer_pos_move(hname, response.pos_array, response.cur_pos)
                         response1 = await stub.Move(pokemon_game_pb2.movepos(row = new_x, column = new_y, hostname = hname, capture = capture_init), wait_for_ready=True)
-                        time.sleep(1)
                         print("I made a move")
                 else:
                     pass

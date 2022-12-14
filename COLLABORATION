@@ -1,0 +1,4 @@
+Christan Grant, cgrant@ou.edu, Instructor of CS 5113, Hints on Asynchrnous communication and increasing the number of cores
+Pradipkumar Rajasekaran, pradipkumar.rajasekaran-1@ou.edu, Sending list of coordinates as flattened list and resize them
+Github for Asyn GRPC examples, https://github.com/grpc/grpc/tree/master/examples/python/helloworld, Implemented asynchronous messaging
+GRPC Aysnc documentation, https://grpc.github.io/grpc/python/grpc_asyncio.html, Documentation on asynchrnous messaging

@@ -32,12 +32,7 @@ Final Project for cs5113
 ![](https://github.com/Aditya-Rohan-Singh/cs5113fa22-proj/blob/main/milestone3.gif)
 
 
-## For 26 Trainer and pokemon gif
 
-
-## Testing on 10 Trainer and pokemon gif
-
-## Emoji Chooser
 
 ### Creating Trainer and Pokemon Nodes
 
@@ -59,7 +54,6 @@ where i is an index tracking the number of P and T.
 
 - The script will also create a list of Trainers and Pokemon as per the given user input and store it with their respective emoji in a json file called node-list.json
 
-- Once the docker-compose.yml file is dynamically created, the script will utilize the subprocess package to execute the command "docker-compose up --build: which will create the mentioned containers in the docker-compose.yml file that was dynamically created based on user input. (Still needs to be implemented
 )
 - The docker file will be similar to what we used in Assignment 1 with no changes except the proto file name.
 
@@ -150,7 +144,7 @@ where i is an index tracking the number of P and T.
 
 - The papers discussed in class specifically , Chubby and Omega gave me the idea to implement this pessimistic concurrency control.
 
-### Messaging
+### Communication
 - To achieve asynchronous messaging, so the clients are talking to the server in no particular order, I implemented asynchrous messaging using the Asyncio grpc API.
 - References:
 	- [Github for Asyn GRPC examples](https://github.com/grpc/grpc/tree/master/examples/python/helloworld)
