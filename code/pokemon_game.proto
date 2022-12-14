@@ -9,7 +9,12 @@ service PokemonGame{
 	rpc pokemon_list (name) returns (pokemon_captured) {}
 	rpc client_path (name) returns (path) {}
 	rpc trainer_list (name) returns (trainer_name) {}
+	rpc caught_location (name) returns (pos) {}
+}
 
+message pos {
+	int32 r = 1;
+	int32 c = 2;
 }
 // (row, column) position to move to and the hostname to log the movement detail
 message movepos{
@@ -48,9 +53,6 @@ message pokemon_captured{
 }
 
 //Returns an array of the path followed by the hostname. The array will be of the from like 12. where 1 is the row number and 2 the column number
-message pos{
-	repeated int32 xy = 1;
-}
 message path{
-	repeated pos path_followed = 1;
+	repeated int32 path_followed = 1;
 }

@@ -8,9 +8,9 @@ pokemon_list = ["\U0001F412", "\U0001F98D", "\U0001F43A", "\U0001F98A", "\U0001F
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--N', type=int, choices = range(1,40), required=True, help ="Size of N*N board.")
-    parser.add_argument('--T', type=int, choices = range(1,30), required=True, help ="No. of Trainers on the board")
-    parser.add_argument('--P', type=int, choices = range(1,30), required=True, help ="No. of Pokemon on the board")
+    parser.add_argument('--N', type=int, choices = range(1,21), required=True)
+    parser.add_argument('--T', type=int, choices = range(1,30), required=True)
+    parser.add_argument('--P', type=int, choices = range(1,30), required=True)
 
     args = parser.parse_args()
     f = open("docker-compose.yml","w")
