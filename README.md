@@ -1,5 +1,6 @@
-# cs5113fa22-proj
-Final Project for cs5113
+# cs5113fa22-proj - THe Pokemon Game
+Final Project for cs5113- Distributed Systems.
+
 
 
 ## Development Schedule
@@ -16,7 +17,7 @@ Final Project for cs5113
 
 ## Execution steps
 
-- As per submission steps, the numner of pokemon and trainers for my project will be 26(10 + 10(J) + 6(Aditya))
+- As per the submission steps, the number of Pokemon and trainers for my project will be 26(10 + 10(J) + 6(Aditya))
 
 - ./pokemon.py --N 20 --T 26 --P 26
 
@@ -24,7 +25,7 @@ Final Project for cs5113
 
 ## How the board is displayed
 
-- The function display\_board() when called will display the current board from the server. It stores the hostnames of the server in a n\*n matrix and while displaying retrieves the emoji assigned to each node from a json file called node-list.json while stores a dictionary in the format hostname:emoji 
+- The function display\_board() when called will display the current board from the server. It stores the hostnames of the server in an n*n matrix and while displaying retrieves the emoji assigned to each node from a json file called node-list.json while stores a dictionary in the format hostname:emoji 
 
 - Note: The GIF might take some to load. But it is there in the README.md
 
